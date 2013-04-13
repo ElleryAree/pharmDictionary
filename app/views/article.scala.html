@@ -1,0 +1,11 @@
+@(article: Article)
+
+@main("Article") {
+    <a href="@routes.ArticlesController.list()">back</a>
+
+    <h1>@article.caption</h1>
+
+    <div>@article.body</div>
+
+    <a href="@routes.ArticlesController.list()">back</a>
+}

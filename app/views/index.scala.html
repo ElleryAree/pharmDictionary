@@ -1,0 +1,33 @@
+@(articles: List[Article], taskForm: Form[(String, String)])
+
+@import helper._
+
+@main("Articles") {
+
+    <h1>@articles.size article(s)</h1>
+
+    <ul>
+        @articles.map { article =>
+            <li>
+                <b>@article.caption</b><br>
+                <a href="@routes.ArticlesController.one(article.id)">more</a>
+
+                @form(routes.ArticlesController.delete(article.id)) {
+                    <input type="submit" value="Delete">
+                        }
+            </li>
+        }
+    </ul>
+
+    <h2>Add a new article</h2>
+
+    @form(routes.ArticlesController.create()) {
+
+        @inputText(taskForm("caption"))
+        @inputText(taskForm("body"))
+
+        <input type="submit" value="Create">
+
+    }
+
+}
