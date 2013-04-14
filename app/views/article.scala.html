@@ -1,9 +1,10 @@
 @(article: Article, taskForm: Form[(String, String)])
 
 @import helper._
+@import helper.twitterBootstrap._
 
 @main("Article") {
-    <a href="@routes.ArticlesController.list()">back</a>
+    <a href="@routes.ArticlesController.list()">@Messages("articleBack")</a>
 
     <h1>@article.caption</h1>
 
@@ -11,12 +12,12 @@
 
     @form(routes.ArticlesController.edit(article.id.toString)) {
 
-        @inputText(taskForm("caption"))
-        @inputText(taskForm("body"))
+        @inputText(taskForm("caption"), '_label -> Messages("articleCaption"))
+        @inputText(taskForm("body"), '_label -> Messages("articleBody"))
 
-        <input type="submit" value="Save">
+        <input type="submit" value="@Messages("articleSave")">
 
     }
 
-    <a href="@routes.ArticlesController.list()">back</a>
+    <a href="@routes.ArticlesController.list()">@Messages("articleBack")</a>
 }

@@ -6,6 +6,7 @@ import play.api.data._
 import play.api.data.Forms._
 import models.Article
 import play.api.templates.Html
+import play.api.i18n.{Messages, Lang}
 
 object ArticlesController extends Controller{
   def list = Action{

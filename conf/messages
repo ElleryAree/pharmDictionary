@@ -1,0 +1,14 @@
+articlesCaption = article(s)
+articlesMore = more
+articlesDelete = delete
+articlesAddNewArticle = Add a new article
+
+articleCaption = Caption:
+articleBody = Body:
+articleCreate = create
+
+articleBack = back
+articleSave = Save
+
+constraint.required=Required
+error.required=This field is required

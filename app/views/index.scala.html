@@ -1,32 +1,33 @@
 @(articles: List[Article], taskForm: Form[(String, String)])
 
 @import helper._
+@import helper.twitterBootstrap._
 
 @main("Articles") {
 
-    <h1>@articles.size article(s)</h1>
+    <h1>@articles.size @Messages("articlesCaption")</h1>
 
     <ul>
         @articles.map { article =>
             <li>
                 <b>@article.caption</b><br>
-                <a href="@routes.ArticlesController.one(article.id.toString)">more</a>
+                <a href="@routes.ArticlesController.one(article.id.toString)">@Messages("articlesMore")</a>
 
                 @form(routes.ArticlesController.delete(article.id.toString)) {
-                    <input type="submit" value="Delete">
+                    <input type="submit" value="@Messages("articlesDelete")">
                         }
             </li>
         }
     </ul>
 
-    <h2>Add a new article</h2>
+    <h2>@Messages("articlesAddNewArticle")</h2>
 
     @form(routes.ArticlesController.create()) {
 
-        @inputText(taskForm("caption"))
-        @inputText(taskForm("body"))
+        @inputText(taskForm("caption"), '_label -> Messages("articleCaption"))
+        @inputText(taskForm("body"), '_label -> Messages("articleBody"))
 
-        <input type="submit" value="Create">
+        <input type="submit" value="@Messages("articleCreate")">
 
     }
 
