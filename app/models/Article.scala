@@ -2,7 +2,6 @@ package models
 
 import dao.MongoWrapper
 import com.mongodb.casbah.commons.Imports._
-import org.bson.types.ObjectId
 import com.mongodb.casbah.commons.TypeImports.ObjectId
 
 case class Article(id: ObjectId, caption: String, body: String) {

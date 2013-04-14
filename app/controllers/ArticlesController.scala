@@ -4,7 +4,7 @@ import play.api.mvc._
 
 import play.api.data._
 import play.api.data.Forms._
-import models.{Article}
+import models.Article
 
 object ArticlesController extends Controller{
   def list = Action{
@@ -27,7 +27,7 @@ object ArticlesController extends Controller{
   }
   def delete(id: String) = Action {
     Article.delete(id)
-    Redirect(routes.ArticlesController.list)
+    Redirect(routes.ArticlesController.list())
   }
 
   val taskForm = Form( tuple(
