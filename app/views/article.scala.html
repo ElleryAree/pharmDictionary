@@ -1,4 +1,6 @@
-@(article: Article)
+@(article: Article, taskForm: Form[(String, String)])
+
+@import helper._
 
 @main("Article") {
     <a href="@routes.ArticlesController.list()">back</a>
@@ -6,6 +8,15 @@
     <h1>@article.caption</h1>
 
     <div>@article.body</div>
+
+    @form(routes.ArticlesController.edit(article.id.toString)) {
+
+        @inputText(taskForm("caption"))
+        @inputText(taskForm("body"))
+
+        <input type="submit" value="Save">
+
+    }
 
     <a href="@routes.ArticlesController.list()">back</a>
 }

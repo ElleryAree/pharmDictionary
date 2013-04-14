@@ -10,6 +10,7 @@ GET     /articles                           controllers.ArticlesController.list
 GET     /articles/:id                       controllers.ArticlesController.one(id: String)
 POST     /articles                          controllers.ArticlesController.create
 POST     /articles/:id/delete               controllers.ArticlesController.delete(id: String)
+POST     /articles/:id/edit                 controllers.ArticlesController.edit(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

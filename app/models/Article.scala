@@ -24,6 +24,10 @@ object Article {
     articleCollection.insert(MongoDBObject("caption" -> caption, "body" -> body))
   }
 
+  def save(id: String, caption: String, body: String) {
+    articleCollection.update(byId(id), MongoDBObject("caption" -> caption, "body" -> body))
+  }
+
   def delete(id: String) {
     articleCollection.remove(byId(id))
   }
