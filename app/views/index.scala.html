@@ -10,9 +10,9 @@
         @articles.map { article =>
             <li>
                 <b>@article.caption</b><br>
-                <a href="@routes.ArticlesController.one(article.id)">more</a>
+                <a href="@routes.ArticlesController.one(article.id.toString)">more</a>
 
-                @form(routes.ArticlesController.delete(article.id)) {
+                @form(routes.ArticlesController.delete(article.id.toString)) {
                     <input type="submit" value="Delete">
                         }
             </li>

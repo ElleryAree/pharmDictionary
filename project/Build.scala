@@ -10,7 +10,8 @@ object ApplicationBuild extends Build {
   val appDependencies = Seq(
     // Add your project dependencies here,
     jdbc,
-    "org.mongodb" %% "casbah" % "2.5.0"
+    "org.mongodb" %% "casbah" % "2.5.0"//,
+//    "com.novus" %% "salat" % "1.9.2-SNAPSHOT"
   )
 
 

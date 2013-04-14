@@ -4,14 +4,17 @@ import play.api.mvc._
 
 import play.api.data._
 import play.api.data.Forms._
-import models.{MongoArticle, Article}
+import models.{Article}
 
 object ArticlesController extends Controller{
   def list = Action{
-    Ok(views.html.index(MongoArticle.all(), taskForm))
+    Ok(views.html.index(Article.all(), taskForm))
   }
-  def one(id: Int) = Action {
-    Ok(views.html.article(Article.one(id)))
+  def one(id: String) = Action {
+    Article.one(id) match {
+      case Some(article) => Ok(views.html.article(article))
+      case None => BadRequest(views.html.index(Article.all(), taskForm))
+    }
   }
   def create = Action { implicit request =>
     taskForm.bindFromRequest.fold(
@@ -22,7 +25,7 @@ object ArticlesController extends Controller{
       }
     )
   }
-  def delete(id: Int) = Action {
+  def delete(id: String) = Action {
     Article.delete(id)
     Redirect(routes.ArticlesController.list)
   }
