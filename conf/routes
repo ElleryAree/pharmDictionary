@@ -5,6 +5,11 @@
 # Home page
 GET     /                           controllers.Application.index
 
+# Authentication
+GET     /login                              controllers.Auth.login
+POST    /login                              controllers.Auth.authenticate
+GET     /logout                             controllers.Auth.logout
+
 #articles
 GET     /articles                           controllers.ArticlesController.list
 GET     /articles/:id                       controllers.ArticlesController.one(id: String)

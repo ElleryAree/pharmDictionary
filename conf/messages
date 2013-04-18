@@ -1,5 +1,5 @@
 articlesCaption = article(s)
-articlesMore = more
+articlesEdit = edit
 articlesDelete = delete
 articlesAddNewArticle = Add a new article
 
@@ -7,8 +7,15 @@ articleCaption = Caption:
 articleBody = Body:
 articleCreate = create
 
-articleBack = back
+articleBack = Cancel
 articleSave = Save
 
 constraint.required=Required
 error.required=This field is required
+
+loginRemember = Remember me
+loginEmailField = Email
+loginPassField = Password
+loginCaption=Sign in
+
+mainLogout = Logout

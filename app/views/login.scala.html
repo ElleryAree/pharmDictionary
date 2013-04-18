@@ -1,0 +1,42 @@
+@(form: Form[(String,String, Boolean)])(implicit flash: Flash)
+
+<html>
+<head>
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+    <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/login.css")">
+</head>
+<body>
+
+    @helper.form(routes.Auth.authenticate) {
+
+        <h1>@Messages("loginCaption")</h1>
+
+        @form.globalError.map { error =>
+            <p class="error">
+                @error.message
+            </p>
+        }
+
+        @flash.get("success").map { message =>
+            <p class="success">
+                @message
+            </p>
+        }
+
+        <p>
+            <input type="email" name="email" placeholder="@Messages("loginEmailField")" id="email" value="@form("email").value">
+        </p>
+        <p>
+            <input type="password" name="password" id="password" placeholder="@Messages("loginPassField")">
+        </p>
+        <p>
+            <input type="checkbox" name="remember" id="remember"><label>@Messages("loginRemember")</label>
+        </p>
+        <p>
+            <button type="submit" id="loginbutton">Login</button>
+        </p>
+
+    }
+
+</body>
+</html>

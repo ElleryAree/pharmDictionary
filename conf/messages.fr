@@ -1,5 +1,4 @@
 articlesCaption = article(s)
-articlesMore = plus
 articlesDelete = supprimer
 articlesAddNewArticle = Ajouter un nouveau article
 
@@ -7,8 +6,13 @@ articleCaption = Le titre:
 articleBody = Le contenu:
 articleCreate = Créer
 
-articleBack = retour
+articleBack = Annuler
 articleSave = Enregister
 
 constraint.required=Obligatoire
 error.required=Ce champ est obligatoire
+articlesEdit=modifier
+loginRemember=Se souvenir de moi
+loginEmailField=Email
+loginPassField=D\u00E9connecter
+loginCaption=Se connecter

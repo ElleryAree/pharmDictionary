@@ -5,30 +5,38 @@
 
 @main("Articles") {
 
-    <h1>@articles.size @Messages("articlesCaption")</h1>
+    <h3>@articles.size @Messages("articlesCaption")</h3>
+    <a href="#myModal" role="button" class="btn" data-toggle="modal">@Messages("articlesAddNewArticle")</a><hr>
 
-    <ul>
+    <div class="well">
+    <dl class="dl-horizontal">
         @articles.map { article =>
-            <li>
-                <b>@article.caption</b><br>
-                <a href="@routes.ArticlesController.one(article.id.toString)">@Messages("articlesMore")</a>
+            <dt>@article.caption</dt>
+            <dd>@article.body <a href="@routes.ArticlesController.one(article.id.toString)">@Messages("articlesEdit")</a>
 
                 @form(routes.ArticlesController.delete(article.id.toString)) {
-                    <input type="submit" value="@Messages("articlesDelete")">
+                    <input type="submit" class="btn" value="@Messages("articlesDelete")">
                         }
-            </li>
+            </dd>
         }
-    </ul>
+    </dl>
+    </div>
 
-    <h2>@Messages("articlesAddNewArticle")</h2>
+    <div id="myModal" class="modal hide fade">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>@Messages("articlesAddNewArticle")</h3>
+        </div>
+        <div class="modal-body">
+            @form(routes.ArticlesController.create(), 'class -> ".form-horizontal") {
 
-    @form(routes.ArticlesController.create()) {
-
-        @inputText(taskForm("caption"), '_label -> Messages("articleCaption"))
-        @inputText(taskForm("body"), '_label -> Messages("articleBody"))
-
-        <input type="submit" value="@Messages("articleCreate")">
-
-    }
+                @inputText(taskForm("caption"), '_label -> Messages("articleCaption"))
+                @textarea(taskForm("body"), '_label -> Messages("articleBody"))
+        </div>
+        <div class="modal-footer">
+            <input type="submit" value="@Messages("articleCreate")">
+            }
+        </div>
+    </div>
 
 }
