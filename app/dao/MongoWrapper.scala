@@ -3,5 +3,35 @@ package dao
 import com.mongodb.casbah.Imports._
 
 object MongoWrapper {
-  val mongoClient =  MongoClient()("site2")
+  private val mongoClientName =  "site2"
+
+  private def executeQuery[T](collectionName: String, action: (MongoCollection) => T): T = {
+    val mongo = MongoConnection("localhost", 27017)
+    val mongoClient = mongo(mongoClientName)
+    val collection = mongoClient(collectionName)
+    try action(collection)
+//    catch { case _ => None}
+    finally mongo.underlying.close()
+  }
+
+  def insert(collectionName: String, objectToInsert: MongoDBObject){
+    executeQuery(collectionName, (collection: MongoCollection) => collection.insert(objectToInsert))
+  }
+
+  def find[T](collectionName: String, converter: (DBObject) => T, query: Option[MongoDBObject] = None):List[T] = {
+    executeQuery[List[T]](collectionName,
+      (collection: MongoCollection) => (for {x <- collection.find()} yield converter(x)).toList)
+  }
+
+  def update(collectionName: String, query: MongoDBObject, objectToUpdate: MongoDBObject){
+    executeQuery(collectionName, (collection: MongoCollection) => collection.update(query, objectToUpdate))
+  }
+
+  def remove(collectionName: String, query: MongoDBObject) {
+    executeQuery(collectionName, (collection: MongoCollection) => collection.remove(query))
+  }
+
+  def findOne(collectionName: String, query: MongoDBObject): Option[DBObject] = {
+    executeQuery[Option[DBObject]](collectionName, (collection: MongoCollection) => collection.findOne(query))
+  }
 }

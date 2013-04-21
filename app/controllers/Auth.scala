@@ -42,12 +42,12 @@ object Auth extends Controller {
           case Some(uri) => Redirect(uri)
           case None => Redirect(controllers.routes.Application.index())
         }).withSession(
-          Security.username -> user._1)
+          Security.username -> Crypto.sign(user._1))
 
         if (user._3) {
           action.withCookies(Cookie(
             name = REMEMBER_COOKIE,
-            value = Crypto.sign(user._1) + "-" + user._1,
+            value = Crypto.sign(user._1),
             maxAge = Some(Time.parseDuration("30d"))
           ))
         } else {

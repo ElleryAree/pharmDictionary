@@ -8,7 +8,7 @@ case class Article(id: ObjectId, caption: String, body: String) {
 }
 
 object Article {
-  val articleCollection = MongoWrapper.mongoClient("articles")
+  val articleCollection = "articles"
 
   def byId(id: String) = MongoDBObject("_id" -> new ObjectId(id))
 
@@ -17,23 +17,23 @@ object Article {
   }
 
   def all(): List[Article] = {
-    (for {x <- articleCollection.find()} yield articleFromDBObject(x)).toList
+    MongoWrapper.find[Article](articleCollection, articleFromDBObject)
   }
 
   def create(caption: String, body: String) {
-    articleCollection.insert(MongoDBObject("caption" -> caption, "body" -> body))
+    MongoWrapper.insert(articleCollection, MongoDBObject("caption" -> caption, "body" -> body))
   }
 
   def save(id: String, caption: String, body: String) {
-    articleCollection.update(byId(id), MongoDBObject("caption" -> caption, "body" -> body))
+    MongoWrapper.update(articleCollection, byId(id), MongoDBObject("caption" -> caption, "body" -> body))
   }
 
   def delete(id: String) {
-    articleCollection.remove(byId(id))
+    MongoWrapper.remove(articleCollection, byId(id))
   }
 
   def one(id: String): Option[Article] = {
-    articleCollection.findOne(byId(id)) match {
+    MongoWrapper.findOne(articleCollection, byId(id)) match {
       case None => None
       case Some(rawArticle) => Some(articleFromDBObject(rawArticle))
     }
