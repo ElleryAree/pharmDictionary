@@ -1,25 +1,45 @@
-@(articles: List[Article], taskForm: Form[(String, String, String)])(implicit l: Lang)
+@(articles: Map[String, List[Article]], taskForm: Form[(String, String, String)])(implicit l: Lang)
 
 @import helper._
 @import helper.twitterBootstrap._
 
 @main("Articles") {
 
-    <h3>@articles.size @Messages("articlesCaption")</h3>
+    &nbsp;<h3>@articles.size @Messages("articlesCaption")</h3>
     <a href="#myModal" role="button" class="btn" data-toggle="modal">@Messages("articlesAddNewArticle")</a><hr>
 
-    <div class="well">
-    <dl class="dl-horizontal">
-        @articles.map { article =>
-            <dt>@article.caption</dt>
-            <dd>@article.body <a href="@routes.ArticlesController.one(article.id.toString)">@Messages("articlesEdit")</a>
+    <script>
+            $(document).ready(openDefaultTab())
 
-                @form(routes.ArticlesController.delete(article.id.toString)) {
-                    <input type="submit" class="btn" value="@Messages("articlesDelete")">
-                        }
-            </dd>
+        function openDefaultTab(){
+                $('#articles a:first').tab('show');
+            }
+    </script>
+
+    <div class="tabbable tabs-left" id="articles">
+        <ul class="nav nav-tabs">
+        @articles.keys.map { key =>
+            <li class="nav nav-tabs"><a href="#@key.replaceAll(" ", "_")" data-toggle="tab">@key</a></li>
         }
-    </dl>
+        </ul>
+        <div class="tab-content">
+            @articles.map {entry =>
+
+                <div class="well tab-pane fade" id="@entry._1.replaceAll(" ", "_")">
+                    <dl class="dl-horizontal">
+                        @entry._2.map { article =>
+                            <dt>@article.caption</dt>
+                            <dd>@article.body <a href="@routes.ArticlesController.one(article.id.toString)">@Messages("articlesEdit")</a>
+
+                                @form(routes.ArticlesController.delete(article.id.toString)) {
+                                    <input type="submit" class="btn" value="@Messages("articlesDelete")">
+                                        }
+                            </dd>
+                        }
+                    </dl>
+                </div>
+            }
+        </div>
     </div>
 
     <div id="myModal" class="modal hide fade">

@@ -5,6 +5,7 @@ articlesAddNewArticle = Ajouter un nouveau article
 articleCaption = Le titre:
 articleBody = Le contenu:
 articleCreate = Créer
+articleNoGroup=Pas de groupe
 
 articleBack = Annuler
 articleSave = Enregister
@@ -19,4 +20,4 @@ loginCaption=Se connecter
 mainLogout=Déconnecter
 ObjectNotFoundException=Pas d'objet
 DBErrorCaption=Échec de base des données
-articleGroup=La Groupe\:
+articleGroup=La Groupe:

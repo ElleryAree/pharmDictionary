@@ -6,6 +6,7 @@ articleCaption = Заголовок:
 articleGroup=Группа:
 articleBody = Тело статьи:
 articleCreate = создать
+articleNoGroup=Нет группы
 
 articleBack = Назад
 articleSave = Сохранить
