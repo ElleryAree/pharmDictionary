@@ -1,4 +1,4 @@
-@(articles: List[Article], taskForm: Form[(String, String)])
+@(articles: List[Article], taskForm: Form[(String, String, String)])(implicit l: Lang)
 
 @import helper._
 @import helper.twitterBootstrap._
@@ -31,6 +31,7 @@
             @form(routes.ArticlesController.create(), 'class -> ".form-horizontal") {
 
                 @inputText(taskForm("caption"), '_label -> Messages("articleCaption"))
+                @inputText(taskForm("group"), '_label -> Messages("articleGroup"))
                 @textarea(taskForm("body"), '_label -> Messages("articleBody"))
         </div>
         <div class="modal-footer">

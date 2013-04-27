@@ -10,6 +10,10 @@ GET     /login                              controllers.Auth.login
 POST    /login                              controllers.Auth.authenticate
 GET     /logout                             controllers.Auth.logout
 
+# Language change
+
+GET    /lang/:code                         controllers.Application.changeLanguage(code: String)
+
 #articles
 GET     /articles                           controllers.ArticlesController.list
 GET     /articles/:id                       controllers.ArticlesController.one(id: String)

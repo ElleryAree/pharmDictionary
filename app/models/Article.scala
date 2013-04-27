@@ -32,11 +32,7 @@ object Article {
     MongoWrapper.remove(articleCollection, byId(id))
   }
 
-  def one(id: String): Option[Article] = {
-    MongoWrapper.findOne(articleCollection, byId(id)) match {
-      case None => None
-      case Some(rawArticle) => Some(articleFromDBObject(rawArticle))
-    }
-
+  def one(id: String): Article = {
+    MongoWrapper.findOne[Article](articleCollection, byId(id), articleFromDBObject)
   }
 }

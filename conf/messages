@@ -4,6 +4,7 @@ articlesDelete = delete
 articlesAddNewArticle = Add a new article
 
 articleCaption = Caption:
+articleGroup = Group:
 articleBody = Body:
 articleCreate = create
 
@@ -19,3 +20,6 @@ loginPassField = Password
 loginCaption=Sign in
 
 mainLogout = Logout
+
+ObjectNotFoundException = Object not found
+DBErrorCaption = Database error

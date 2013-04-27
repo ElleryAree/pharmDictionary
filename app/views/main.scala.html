@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String)(content: Html)(implicit l: Lang)
 
 <!DOCTYPE html>
 
@@ -16,6 +16,9 @@
             <div class="navbar-inner">
                 <a class="brand" href="#">Title</a>
                 <ul class="nav pull-right">
+                    <li><a href="@routes.Application.changeLanguage("ru")">ru</a> </li>
+                    <li><a href="@routes.Application.changeLanguage("en")">en</a> </li>
+                    <li><a href="@routes.Application.changeLanguage("fr")">fr</a> </li>
                     <li><a href="@routes.Auth.logout()">@Messages("mainLogout")</a></li>
                 </ul>
             </div>

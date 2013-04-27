@@ -1,6 +1,7 @@
 package dao
 
 import com.mongodb.casbah.Imports._
+import play.api.i18n.Messages
 
 object MongoWrapper {
   private val mongoClientName =  "site2"
@@ -10,7 +11,6 @@ object MongoWrapper {
     val mongoClient = mongo(mongoClientName)
     val collection = mongoClient(collectionName)
     try action(collection)
-//    catch { case _ => None}
     finally mongo.underlying.close()
   }
 
@@ -18,9 +18,16 @@ object MongoWrapper {
     executeQuery(collectionName, (collection: MongoCollection) => collection.insert(objectToInsert))
   }
 
-  def find[T](collectionName: String, converter: (DBObject) => T, query: Option[MongoDBObject] = None):List[T] = {
+  def find[T](collectionName: String, converter: (DBObject) => T, query: Option[MongoDBObject] = None): List[T] = {
     executeQuery[List[T]](collectionName,
       (collection: MongoCollection) => (for {x <- collection.find()} yield converter(x)).toList)
+  }
+
+  def findOne[T](collectionName: String, query: MongoDBObject, converter: (DBObject) => T): T = {
+    executeQuery[T](collectionName, (collection: MongoCollection) => collection.findOne(query) match {
+      case Some(result) => converter(result)
+      case None => throw new Exception(Messages("ObjectNotFoundException"))
+    })
   }
 
   def update(collectionName: String, query: MongoDBObject, objectToUpdate: MongoDBObject){
@@ -31,7 +38,4 @@ object MongoWrapper {
     executeQuery(collectionName, (collection: MongoCollection) => collection.remove(query))
   }
 
-  def findOne(collectionName: String, query: MongoDBObject): Option[DBObject] = {
-    executeQuery[Option[DBObject]](collectionName, (collection: MongoCollection) => collection.findOne(query))
-  }
 }

@@ -11,17 +11,18 @@ import auth.Secured
 
 object ArticlesController extends Controller with Secured{
   def list = withAuth {username => implicit request =>
+    System.out.println("Back test: " + Messages("articleCaption"))
     Ok(views.html.index(Article.all(), taskForm))
   }
   def one(id: String) = withAuth {username => implicit request =>
-    Article.one(id) match {
-      case Some(article) => {
-        val dataForForm = Map("caption" -> article.caption, "body" -> article.body)
-        Ok(views.html.article(article, taskForm.bind(dataForForm)))
-      }
-      case None => BadRequest(views.html.index(Article.all(), taskForm))
+    try{
+      val article = Article.one(id)
+      val dataForForm = Map("caption" -> article.caption, "body" -> article.body)
+      Ok(views.html.article(article, taskForm.bind(dataForForm)))
     }
+    catch { case e: Throwable => { BadRequest(views.html.index(Article.all(), taskForm)) } }
   }
+
   def create = withAuth {username => implicit request =>
     processRequestWithMethod(Article.create,
                                           views.html.index(Article.all(), _),
@@ -29,18 +30,16 @@ object ArticlesController extends Controller with Secured{
   }
 
   def edit(id: String) = withAuth {username => implicit request =>
-    Article.one(id) match {
-      case Some(article) => {
+    try {
         processRequestWithMethod(Article.save(id, _, _),
-          views.html.article(article, _),
+          views.html.article(Article.one(id), _),
           routes.ArticlesController.one(id))
-      }
-      case _ => BadRequest(views.html.index(Article.all(), taskForm))
     }
+    catch { case e: Throwable => { BadRequest(views.html.index(Article.all(), taskForm)) } }
   }
 
   def processRequestWithMethod(method: => (String, String) => Unit,
-                               errorMethod: => (Form[(String, String)]) => Html,
+                               errorMethod: => (Form[(String, String, String)]) => Html,
                                successMethod: Call)(implicit request: Request[AnyContent]) = {
       taskForm.bindFromRequest.fold(
         errors => BadRequest(errorMethod(errors)),
@@ -58,7 +57,8 @@ object ArticlesController extends Controller with Secured{
 
   val taskForm = Form( tuple(
     "caption" -> nonEmptyText,
-    "body" -> nonEmptyText
+    "body" -> nonEmptyText,
+    "group" -> nonEmptyText
     )
   )
 }

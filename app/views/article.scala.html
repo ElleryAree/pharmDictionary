@@ -1,4 +1,4 @@
-@(article: Article, taskForm: Form[(String, String)])
+@(article: Article, taskForm: Form[(String, String, String)])(implicit l: Lang)
 
 @import helper._
 @import helper.twitterBootstrap._
@@ -7,6 +7,7 @@
     @form(routes.ArticlesController.edit(article.id.toString)) {
 
         @inputText(taskForm("caption"), '_label -> Messages("articleCaption"))
+        @inputText(taskForm("group"), '_label -> Messages("articleGroup"))
         @inputText(taskForm("body"), '_label -> Messages("articleBody"))
 
         <input type="submit" value="@Messages("articleSave")" class="btn-primary"><a href="@routes.ArticlesController.list()" class="btn">@Messages("articleBack")</a>

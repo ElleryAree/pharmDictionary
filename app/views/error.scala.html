@@ -1,0 +1,8 @@
+@(caption: String, text: String)
+
+@main("Article") {
+    <div class="alert alert-error">
+        <b>@caption</b> @text
+    </div>
+    <a href="@routes.ArticlesController.list()" class="btn">@Messages("articleBack")</a>
+}
