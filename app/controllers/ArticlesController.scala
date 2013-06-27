@@ -62,7 +62,7 @@ object ArticlesController extends Controller with Secured{
 
   val taskForm = Form( tuple(
     "caption" -> nonEmptyText,
-    "group" -> nonEmptyText,
+    "group" -> text,
     "body" -> nonEmptyText
   )
   )

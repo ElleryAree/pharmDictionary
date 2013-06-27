@@ -13,7 +13,6 @@ object Application extends Controller {
 
   def changeLanguage(code: String) = Action {
     implicit request =>
-    System.out.println("Code: " + code)
     Lang.get(code) match {
       case Some(lang) => Redirect(request.headers.get(REFERER).getOrElse("/")).withLang(lang)
       case None => InternalServerError(views.html.error("Language change", "No language with code:" + code))

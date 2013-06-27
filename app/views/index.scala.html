@@ -5,42 +5,57 @@
 
 @main("Articles") {
 
-    &nbsp;<h3>@articles.size @Messages("articlesCaption")</h3>
-    <a href="#myModal" role="button" class="btn" data-toggle="modal">@Messages("articlesAddNewArticle")</a><hr>
+    <style type="text/css">
+        body {
+            background-color: #8d8d8d;
+            }
+        .well {
+            background-color: #FFFFFF;
+            }
+    </style>
 
     <script>
             $(document).ready(openDefaultTab())
 
-        function openDefaultTab(){
-                $('#articles a:first').tab('show');
+            function openDefaultTab(){
+            $('#articles a:first').tab('show');
             }
     </script>
 
-    <div class="tabbable tabs-left" id="articles">
-        <ul class="nav nav-tabs">
-        @articles.keys.map { key =>
-            <li class="nav nav-tabs"><a href="#@key.replaceAll(" ", "_")" data-toggle="tab">@key</a></li>
-        }
-        </ul>
-        <div class="tab-content">
-            @articles.map {entry =>
+    <div class="container">
+        <div class="well">
 
-                <div class="well tab-pane fade" id="@entry._1.replaceAll(" ", "_")">
-                    <dl class="dl-horizontal">
-                        @entry._2.map { article =>
-                            <dt>@article.caption</dt>
-                            <dd>@article.body <a href="@routes.ArticlesController.one(article.id.toString)">@Messages("articlesEdit")</a>
+    &nbsp;<h3>@articles.size @Messages("articlesCaption")</h3>
+    <a href="#myModal" role="button" class="btn" data-toggle="modal">@Messages("articlesAddNewArticle")</a><hr>
 
-                                @form(routes.ArticlesController.delete(article.id.toString)) {
-                                    <input type="submit" class="btn" value="@Messages("articlesDelete")">
-                                        }
-                            </dd>
-                        }
-                    </dl>
-                </div>
+        <div class="tabbable tabs-left" id="articles">
+            <ul class="nav nav-tabs">
+            @articles.keys.map { key =>
+                <li class="nav nav-tabs"><a href="#@key.replaceAll(" ", "_")" data-toggle="tab">@key</a></li>
             }
+            </ul>
+            <div class="tab-content">
+                @articles.map {entry =>
+
+                    <div class="well tab-pane fade" id="@entry._1.replaceAll(" ", "_")">
+                        <dl class="dl-horizontal">
+                            @entry._2.map { article =>
+                                <dt>@article.caption</dt>
+                                <dd>@article.body <a href="@routes.ArticlesController.one(article.id.toString)">@Messages("articlesEdit")</a>
+
+                                    @form(routes.ArticlesController.delete(article.id.toString)) {
+                                        <input type="submit" class="btn" value="@Messages("articlesDelete")">
+                                            }
+                                </dd>
+                            }
+                        </dl>
+                    </div>
+                }
+            </div>
         </div>
     </div>
+
+    </div> <!-- container -->
 
     <div id="myModal" class="modal hide fade">
         <div class="modal-header">
@@ -50,7 +65,7 @@
         <div class="modal-body">
             @form(routes.ArticlesController.create(), 'class -> ".form-horizontal") {
 
-                @inputText(taskForm("caption"), '_label -> Messages("articleCaption"))
+                @inputText(taskForm("caption"), '_label -> Messages("articleCaption"), 'id->"form_caption")
                 @inputText(taskForm("group"), '_label -> Messages("articleGroup"))
                 @textarea(taskForm("body"), '_label -> Messages("articleBody"))
         </div>
