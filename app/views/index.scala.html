@@ -1,77 +1,190 @@
-@(articles: Map[String, List[Article]], taskForm: Form[(String, String, String)])(implicit l: Lang)
-
-@import helper._
-@import helper.twitterBootstrap._
+@(groups: Set[String], isAdmin: Boolean)(implicit l: Lang)
 
 @main("Articles") {
-
-    <style type="text/css">
-        body {
-            background-color: #8d8d8d;
-            }
-        .well {
-            background-color: #FFFFFF;
+    <style>
+        .new{
+            color: #4c60bb;
             }
     </style>
-
     <script>
-            $(document).ready(openDefaultTab())
+            $(document).ready(openDefaultTab());
+
+            function send_request(url, errorContainerName, processSuccessData, type, params){
+                console.log("Url: " + url + ", errorContainerName" + errorContainerName);
+                $.ajax({
+                    url: url,
+                    data: params,
+                    type: type,
+                    beforeSend: function(){
+                        $("#requestProgressBar").addClass("progress-striped active");
+                    },
+                    success: function( json ) {
+                        $("#requestProgressBar").removeClass("progress-striped active");
+
+                        if (json.success){
+                            if (json.data !== undefined)
+                                processSuccessData(json.data);
+                        } else {
+//                            var errorText = "<p class='text-error'> <b> log in failed: " + json.error.code + " </b> " + json.error.message  + " </p> ";
+                            var errorText = "<p class='text-error'> <b> An error occurred</b> </p> ";
+//                            if (json.error.data !== undefined)
+//                                errorText += "<p class='text-error'> <b> details: </b> " + json.error.data + " </p> ";
+                            appendAlert(errorContainerName, "error", errorText);
+                        }
+                    },
+                error: function(request, status, error){
+                        $("#requestProgressBar").removeClass("progress-striped active");
+                        appendAlert(errorContainerName, "error", request.responseText);
+                    }
+                });
+            }
+
+            function appendAlert(container, messageClass, text){
+                $("#" + container).append("<div class=\"alert alert-" + messageClass + "\">" +
+                                            "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>" +
+                                            text +
+                                            "</div>")
+            }
 
             function openDefaultTab(){
-            $('#articles a:first').tab('show');
+
+            }
+
+            function getArticlesForGroup(group){
+                send_request("/articles/group/" + group, 'mainContainer', function(data){
+                    var articleContainer = $("#articlesContainer");
+                    articleContainer.html("");
+                    data.forEach(function(pre_articles){pre_articles.forEach(function(article){
+                        var isApproved = article.approved == "true" ? "" : "class = 'new'"
+                        @if(isAdmin){
+                            var approvedStyle = article.approved == 'true' ? "style=\"display: none;\"" : "";
+                        }
+                        articleContainer.append(
+                            "<div " + isApproved + ">" +
+                                "<button type=\"button\" class=\"close btn-large\" onclick=\"\"><i class=\"icon-refresh\"></i></button>" +
+                                "<h4>" + article.caption + "</h4>" +
+                                "<div>" + article.body + "</div>" +
+                                "<button class='btn' onclick='editArticle(\""  + article.id + "\")'>edit</button> " +
+                                "<button class='btn' onclick='deleteArticle(\""  + article.id  + "\", \"" + article.group  + "\")'>delete</button> " +
+                                @if(isAdmin){
+                                    "<button class='btn' " + approvedStyle + " onclick='approveArticle(\""  + article.id  + "\", \"" + article.group  + "\")'>approve</button> " +
+                                }
+                            "</div>");
+
+                    })});
+                }, "GET");
+            }
+
+            function createArticle(){
+                $("#form_last_update_container").hide();
+                @if(isAdmin){
+                    $("#form_approve").hide();
+                }
+            }
+
+            function editArticle(id){
+                $("#formModal").modal("show");
+                console.log("Editing article id: " + id);
+                send_request("/articles/" + id, 'form_error_container', function(data){
+                    $("#form_id").val(data.id);
+                    $("#form_caption").val(data.caption);
+                    $("#form_body").text(data.body);
+                    $("#form_group").val(data.group);
+                    $("#form_last_update").html(data.last_update);
+                    $("#form_last_update_container").show();
+                    @if(isAdmin){
+                        if (data.approved != 'false'){
+                            $("#form_approve").show();
+                            $("#form_approve").attr("onclick", "approveArticle(\""  + data.id  + "\", \"" + data.group  + "\"); $(\"#formModal\").modal(\"hide\");");
+                        }
+                    }
+                }, "GET");
+            }
+
+            function deleteArticle(id, group){
+                console.log("Editing article id: " + id);
+                send_request("/articles/" + id + "/delete", 'mainContainer', function(data){
+                    console.log("delete article: group: " + group);
+                    $("#li_" + group).addClass("active");
+                    getArticlesForGroup(group);
+                }, "POST");
+            }
+
+            function saveArticle(){
+                var group = $("#form_group").val();
+                var id = $("#form_id").val();
+                var address = "/articles";
+                if (id){
+                    address += "/" + id + "/edit";
+                }
+                send_request(address, "form_error_container", function(){
+                    console.log("Save article: group: " + group);
+                    $("#formModal").modal("hide");
+                    $("#li_" + group).addClass("active");
+                    getArticlesForGroup(group);
+                }, "POST", $("#article_form").serialize());
+            }
+
+            @if(isAdmin){
+                function approveArticle(id, group){
+                    console.log("approving");
+                    send_request("/articles/" + id + "/approve", 'mainContainer', function(data){
+                    console.log("approved");
+                    $("#li_" + group).addClass("active");
+                    getArticlesForGroup(group);
+                    }, "POST");
+                }
             }
     </script>
 
     <div class="container">
+        <div class="progress" id="requestProgressBar">
+            <div class="bar" style="width: 100%;"></div>
+        </div>
         <div class="well">
-
-    &nbsp;<h3>@articles.size @Messages("articlesCaption")</h3>
-    <a href="#myModal" role="button" class="btn" data-toggle="modal">@Messages("articlesAddNewArticle")</a><hr>
-
-        <div class="tabbable tabs-left" id="articles">
-            <ul class="nav nav-tabs">
-            @articles.keys.map { key =>
-                <li class="nav nav-tabs"><a href="#@key.replaceAll(" ", "_")" data-toggle="tab">@key</a></li>
-            }
-            </ul>
-            <div class="tab-content">
-                @articles.map {entry =>
-
-                    <div class="well tab-pane fade" id="@entry._1.replaceAll(" ", "_")">
-                        <dl class="dl-horizontal">
-                            @entry._2.map { article =>
-                                <dt>@article.caption</dt>
-                                <dd>@article.body <a href="@routes.ArticlesController.one(article.id.toString)">@Messages("articlesEdit")</a>
-
-                                    @form(routes.ArticlesController.delete(article.id.toString)) {
-                                        <input type="submit" class="btn" value="@Messages("articlesDelete")">
-                                            }
-                                </dd>
-                            }
-                        </dl>
-                    </div>
-                }
+            <a href="#formModal" role="button" class="btn" data-toggle="modal" onclick="createArticle()"><i class="icon-refresh"></i>@Messages("articlesAddNewArticle")</a>
+        </div>
+        <div class="well" id="mainContainer">
+            <div class ="row">
+                <div class="span4">
+                    <ul class="nav nav-pills nav-stacked">
+                    @groups.map { key =>
+                        <li id="li_@key"><a onclick="getArticlesForGroup('@key');" data-toggle="tab">@key</a></li>
+                    }
+                    </ul>
+                </div>
+                <div class="span7" id="articlesContainer">
+                </div>
             </div>
         </div>
-    </div>
 
     </div> <!-- container -->
 
-    <div id="myModal" class="modal hide fade">
+    <div id="formModal" class="modal hide fade">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h3>@Messages("articlesAddNewArticle")</h3>
         </div>
         <div class="modal-body">
-            @form(routes.ArticlesController.create(), 'class -> ".form-horizontal") {
-
-                @inputText(taskForm("caption"), '_label -> Messages("articleCaption"), 'id->"form_caption")
-                @inputText(taskForm("group"), '_label -> Messages("articleGroup"))
-                @textarea(taskForm("body"), '_label -> Messages("articleBody"))
+            <form id="article_form">
+                <fieldset>
+                    <input type="hidden" id="form_id" name="_id"/>
+                    <label>Caption:</label>
+                    <input id="form_caption" name="caption" type="text" placeholder="Type caption…"><br>
+                    <label>Body:</label>
+                    <textarea id="form_body" name="body" rows="3"></textarea>
+                    <label>group:</label>
+                    <input id="form_group" name="group" type="text" data-provide="typeahead" data-source="@groups.mkString("[", ",", "]")"><br>
+                </fieldset>
+            </form>
+            <div style="display: none" id="form_last_update_container">Last update: <label id="form_last_update">Now</div>
+            <div id="form_error_container"></div>
         </div>
         <div class="modal-footer">
-            <input type="submit" value="@Messages("articleCreate")">
+            @if(isAdmin){
+                <button class='btn' id="form_approve">approve</button>
             }
+            <input class="btn btn-success" value="@Messages("articleCreate")" onclick="saveArticle();">
         </div>
     </div>
 

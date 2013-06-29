@@ -20,7 +20,15 @@ object MongoWrapper {
 
   def find[T](collectionName: String, converter: (DBObject) => T, query: Option[MongoDBObject] = None): List[T] = {
     executeQuery[List[T]](collectionName,
-      (collection: MongoCollection) => (for {x <- collection.find()} yield converter(x)).toList)
+      (collection: MongoCollection) => (for {x <- query match {
+        case None => collection.find()
+        case Some(dQuery) => collection.find(dQuery)
+      } } yield converter(x)).toList)
+  }
+
+  def find2[T](collectionName: String, converter: (DBObject) => T, query: MongoDBObject): List[T] = {
+    executeQuery[List[T]](collectionName,
+      (collection: MongoCollection) => (for {x <- collection.find(query)} yield converter(x)).toList)
   }
 
   def findOne[T](collectionName: String, query: MongoDBObject, converter: (DBObject) => T): T = {

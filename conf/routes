@@ -17,9 +17,11 @@ GET    /lang/:code                         controllers.Application.changeLanguag
 #articles
 GET     /articles                           controllers.ArticlesController.list
 GET     /articles/:id                       controllers.ArticlesController.one(id: String)
+GET     /articles/group/:group              controllers.ArticlesController.byGroup(group: String)
 POST     /articles                          controllers.ArticlesController.create
 POST     /articles/:id/delete               controllers.ArticlesController.delete(id: String)
 POST     /articles/:id/edit                 controllers.ArticlesController.edit(id: String)
+POST     /articles/:id/approve              controllers.ArticlesController.approve(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

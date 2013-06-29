@@ -8,56 +8,86 @@ import models.Article
 import play.api.templates.Html
 import auth.Secured
 import play.api.i18n.Lang
+import play.api.libs.json._
+import play.Logger
 
 object ArticlesController extends Controller with Secured{
 
-  def groupedArticles()(implicit lang: Lang): Map[String, List[Article]] = {
-    Article.all().groupBy(article => article.group)
+  //TODO это, разумеется, плохо и не правильно
+  def groupedArticles()(implicit lang: Lang): Set[String] = {
+    Article.all().filter(article => !(article.group == null || article.group.isEmpty)). map(article => article.group).toSet
   }
 
-  def list = withAuth {username => implicit request =>
-    Ok(views.html.index(groupedArticles, taskForm))
+  def list = withUser {username => (request, user) =>
+    Ok(views.html.index(groupedArticles, user.admin))
   }
 
   def one(id: String) = withAuth {username => implicit request =>
-    try{
-      val article = Article.one(id)
-      val dataForForm = Map("caption" -> article.caption, "group" -> article.group, "body" -> article.body)
-      Ok(views.html.article(article, taskForm.bind(dataForForm)))
+    Ok(Json.obj(
+      "success" -> true,
+      "data" -> Article.one(id)
+    ))
+  }
+
+  def byGroup(group: String) = withUser {username => (request, user) =>
+    Logger.info("Searching by group: user" + user)
+    Logger.info("Searching by group: group" + group)
+    Ok(Json.obj(
+      "success" -> true,
+      "data" -> Json.arr(Article.byGroup(group))
+      ))
+  }
+
+  def approve(id: String) = withUser {username => (request, user) =>
+    Logger.info("Appriving id: " + id + ", for user: "  + user)
+    user.admin match {
+      case false =>  {
+        Logger.info("Do not approve")
+        BadRequest(Json.obj(
+          "success" -> false,
+          "data" -> "Not enough permissions to approve"))
+      }
+      case true => {
+        Logger.info("Do approve")
+         Article.approve(id, approved = true)
+         Ok(Json.obj(
+          "success" -> true,
+          "data" -> "None")
+        )
+      }
     }
-    catch { case e: Throwable => { BadRequest(views.html.index(groupedArticles, taskForm)) } }
   }
 
-  def create = withAuth {username => implicit request =>
-    processRequestWithMethod(Article.create,
-                                          views.html.index(groupedArticles, _),
-                                          routes.ArticlesController.list())
+  def create = withUser {username => (request, user) =>
+    Logger.info("Create: user" + user.name + ", is admin: " + user.admin)
+    processRequestWithMethod(Article.create(user.admin, _, _, _))(request)
   }
 
-  def edit(id: String) = withAuth {username => implicit request =>
-    try {
-        processRequestWithMethod(Article.save(id, _, _, _),
-          views.html.article(Article.one(id), _),
-          routes.ArticlesController.one(id))
-    }
-    catch { case e: Throwable => { BadRequest(views.html.index(groupedArticles, taskForm)) } }
+  def edit(id: String) = withUser {username => (request, user) =>
+    processRequestWithMethod(Article.save(id, user.admin, _, _, _))(request)
   }
 
-  def processRequestWithMethod(method: => (String, String, String) => Unit,
-                               errorMethod: => (Form[(String, String, String)]) => Html,
-                               successMethod: Call)(implicit request: Request[AnyContent]) = {
+  def processRequestWithMethod(method: => (String, String, String) => Unit)(implicit request: Request[AnyContent]) = {
       taskForm.bindFromRequest.fold(
-        errors => BadRequest(errorMethod(errors)),
+        errors => BadRequest(Json.obj(
+          "success" -> false,
+          "data" -> errors.toString)),
         data => {
           method(data._1, data._2, data._3)
-          Redirect(successMethod)
+          Ok(Json.obj(
+            "success" -> true,
+            "data" -> "None")
+          )
         }
-  )
+      )
   }
 
   def delete(id: String) = withAuth {username => implicit request =>
     Article.delete(id)
-    Redirect(routes.ArticlesController.list())
+    Ok(Json.obj(
+      "success" -> true,
+      "data" -> "None")
+    )
   }
 
   val taskForm = Form( tuple(

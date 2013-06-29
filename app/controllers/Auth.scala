@@ -27,7 +27,8 @@ object Auth extends Controller {
   )
 
   def check(username: String, password: String) = {
-    (username == "admin@admin" && password == "1234")
+    (username == "admin@admin" && password == "1234") ||
+    (username == "some@some" && password == "1234")
   }
 
   def login = Action { implicit request =>
@@ -42,7 +43,7 @@ object Auth extends Controller {
           case Some(uri) => Redirect(uri)
           case None => Redirect(controllers.routes.Application.index())
         }).withSession(
-          Security.username -> Crypto.sign(user._1))
+          Security.username -> user._1)
 
         if (user._3) {
           action.withCookies(Cookie(
