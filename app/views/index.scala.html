@@ -63,6 +63,8 @@
 
             function getArticlesForGroup(group){
                 send_request("/articles/group/" + group, 'mainContainer', function(data){
+                    $("#oneArticleContainer").html("");
+
                     var articleContainer = $("#articlesContainer");
                     articleContainer.html("");
                     data.forEach(function(pre_articles){pre_articles.forEach(function(article){
@@ -76,15 +78,15 @@
                         }
 
                         articleContainer.append(
-                            "<div " + isApproved + ">" +
+                            "<li " + isApproved + ">" +
                                 "<button type=\"button\" class=\"close close-edit btn-large\" data-toggle=\"tooltip\" title=\"Edit\" onclick='editArticle(\""  + article.id + "\")'><i class=\"icon-pencil\"></i></button>" +
                                 @if(isAdmin){
-                                "<button type=\"button\" class=\"close close-edit btn-large\" data-toggle=\"tooltip\" title=\"Approve\" onclick='approveArticle(\""  + article.id  + "\", \"" + article.group  + "\")'><i class=\"icon-ok-sign\"></i></button>" +
+                                "<button type=\"button\" class=\"close close-edit btn-large " + approvedStyle + "\" data-toggle=\"tooltip\" title=\"Approve\" onclick='approveArticle(\""  + article.id  + "\", \"" + article.group  + "\")'><i class=\"icon-ok-sign\"></i></button>" +
                                 }
                                 "<button type=\"button\" class=\"close close-edit btn-large\"  data-toggle=\"tooltip\" title=\"Delete\" onclick='deleteArticle(\""  + article.id  + "\", \"" + article.group  + "\")'><i class=\"icon-remove-sign\"></i></button>" +
-                                "<h4>" + article.caption + "</h4>" +
-                                "<div>" + description + "</div>" +
-                            "</div><hr>");
+                                "<a onclick=\"showArticle('" + article.id + "');\" data-toggle=\"tab\"><h4>" + article.caption + "</h4>" +
+                                "<div>" + description + "</div></a>" +
+                            "</li><hr>");
 
                     })});
 //                    $(".close-edit").tooltip("delay: {show: 100, hide: 100}");
@@ -141,6 +143,17 @@
                 }, "GET");
             }
 
+            function showArticle(id){
+                send_request("/articles/" + id, 'form_error_container', function(data){
+                    var oneArticleContainer = $("#oneArticleContainer");
+                    oneArticleContainer.html("<div><h4 aligh=\"center\">" + data.caption + "</h4>" +
+                        "<p><b>Short Description:</b> " + data.short_description + "</p>" +
+                        "<p><b>Body</b></p><p>" + data.body + "</p>" +
+                        "<p><b>Group:</b> " + data.group + "</p>" +
+                        "<p><b>Last changed:</b> " + data.last_update + "</p>");
+                }, "GET");
+            }
+
             function deleteArticle(id, group){
                 console.log("Editing article id: " + id);
                 send_request("/articles/" + id + "/delete", 'mainContainer', function(data){
@@ -186,11 +199,16 @@
         </div>
         <div class="well" id="mainContainer">
             <div class ="row">
-                <div class="span4">
+                <div class="span2">
                     <ul class="nav nav-pills nav-stacked" id="groupsContainer">
                     </ul>
                 </div>
-                <div class="span7" id="articlesContainer">
+                <div class="span4">
+                    <ul class="nav nav-pills nav-stacked" id="articlesContainer">
+                    </ul>
+                </div>
+                <div class="span5" id="oneArticleContainer">
+
                 </div>
             </div>
         </div>
