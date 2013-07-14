@@ -23,5 +23,10 @@ POST     /articles/:id/delete               controllers.ArticlesController.delet
 POST     /articles/:id/edit                 controllers.ArticlesController.edit(id: String)
 POST     /articles/:id/approve              controllers.ArticlesController.approve(id: String)
 
+#groups
+GET     /groups                             controllers.GroupsController.list
+POST    /groups                             controllers.GroupsController.create
+POST    /groups/:id/edit                    controllers.GroupsController.edit(id: String)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

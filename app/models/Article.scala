@@ -3,13 +3,13 @@ package models
 import dao.MongoWrapper
 import com.mongodb.casbah.commons.Imports._
 import com.mongodb.casbah.commons.TypeImports.ObjectId
-import play.api.i18n.{Lang, Messages}
-import play.api.libs.json.{JsObject, JsValue, Json, Format}
+import play.api.i18n.Lang
+import play.api.libs.json.Json
 import play.Logger
 import java.util.{GregorianCalendar, Date}
 import play.api.libs.json.JsObject
 
-case class Article(id: ObjectId, caption: String, group: String, body: String) {
+case class Article(id: ObjectId, caption: String, short_description: String, group: String, body: String) {
 
 }
 
@@ -25,12 +25,13 @@ object Article {
 
   val format = new java.text.SimpleDateFormat("dd.MM.yyyy hh.mm.ss")
 
-  def mongoObjectFromArticle(caption: String, group: String, body: String, approved: Boolean) =
-    MongoDBObject("caption" -> caption, "group" -> group, "body" -> body, "last_update" -> new Date(), "approved" -> approved)
+  def mongoObjectFromArticle(caption: String, short_description: String, group: String, body: String, approved: Boolean) =
+    MongoDBObject("caption" -> caption, "short_description" -> short_description, "group" -> group, "body" -> body, "last_update" -> new Date(), "approved" -> approved)
 
   def articleFromDBObject(source: DBObject)(implicit lang: Lang): Article = {
     Article(new ObjectId(source.get("_id").toString),
       source.getOrElse("caption", "").toString,
+      source.getOrElse("short_description", "").toString,
       source.getOrElse("group", "").toString,
       source.getOrElse("body", "").toString)
   }
@@ -40,6 +41,7 @@ object Article {
     Json.obj(
       "id" -> source.get("_id").toString,
       "caption" -> source.getOrElse("caption", "").toString,
+      "short_description" -> source.getOrElse("short_description", "").toString,
       "body" -> source.getOrElse("body", "").toString,
       "group" -> source.getOrElse("group", "").toString,
       "approved" -> source.getOrElse("approved", "false").toString,
@@ -55,12 +57,12 @@ object Article {
     MongoWrapper.find2[JsObject](articleCollection, jsonFromDBObject, byGroupQuery(group))
   }
 
-  def create(approved: Boolean, caption: String, group: String, body: String) {
-    MongoWrapper.insert(articleCollection, mongoObjectFromArticle(caption, group, body, approved))
+  def create(approved: Boolean, caption: String, shortDescription: String, group: String, body: String) {
+    MongoWrapper.insert(articleCollection, mongoObjectFromArticle(caption, shortDescription, group, body, approved))
   }
 
-  def save(id: String, approved: Boolean, caption: String, group: String, body: String) {
-    MongoWrapper.update(articleCollection, byIdQuery(id), mongoObjectFromArticle(caption, group, body, approved))
+  def save(id: String, approved: Boolean, caption: String, shortDescription: String, group: String, body: String) {
+    MongoWrapper.update(articleCollection, byIdQuery(id), mongoObjectFromArticle(caption, shortDescription, group, body, approved))
   }
 
   def approve(id: String, approved: Boolean) {

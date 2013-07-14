@@ -5,7 +5,6 @@ import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
 import models.Article
-import play.api.templates.Html
 import auth.Secured
 import play.api.i18n.Lang
 import play.api.libs.json._
@@ -60,20 +59,20 @@ object ArticlesController extends Controller with Secured{
 
   def create = withUser {username => (request, user) =>
     Logger.info("Create: user" + user.name + ", is admin: " + user.admin)
-    processRequestWithMethod(Article.create(user.admin, _, _, _))(request)
+    processRequestWithMethod(Article.create(user.admin, _, _, _, _))(request)
   }
 
   def edit(id: String) = withUser {username => (request, user) =>
-    processRequestWithMethod(Article.save(id, user.admin, _, _, _))(request)
+    processRequestWithMethod(Article.save(id, user.admin, _, _, _, _))(request)
   }
 
-  def processRequestWithMethod(method: => (String, String, String) => Unit)(implicit request: Request[AnyContent]) = {
+  def processRequestWithMethod(method: => (String, String, String, String) => Unit)(implicit request: Request[AnyContent]) = {
       taskForm.bindFromRequest.fold(
         errors => BadRequest(Json.obj(
           "success" -> false,
           "data" -> errors.toString)),
         data => {
-          method(data._1, data._2, data._3)
+          method(data._1, data._2, data._3, data._4)
           Ok(Json.obj(
             "success" -> true,
             "data" -> "None")
@@ -92,6 +91,7 @@ object ArticlesController extends Controller with Secured{
 
   val taskForm = Form( tuple(
     "caption" -> nonEmptyText,
+    "short_description" -> text,
     "group" -> text,
     "body" -> nonEmptyText
   )

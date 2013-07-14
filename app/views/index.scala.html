@@ -5,6 +5,17 @@
         .new{
             color: #4c60bb;
             }
+
+            .close-edit {
+            opacity: 0.8;
+            filter: alpha(opacity=80);
+            }
+
+            .close-edit:hover,
+            .close-edit:focus {
+            opacity: 0.4;
+            filter: alpha(opacity=40);
+            }
     </style>
     <script>
             $(document).ready(openDefaultTab());
@@ -47,7 +58,7 @@
             }
 
             function openDefaultTab(){
-
+                getGroups();
             }
 
             function getArticlesForGroup(group){
@@ -59,24 +70,52 @@
                         @if(isAdmin){
                             var approvedStyle = article.approved == 'true' ? "style=\"display: none;\"" : "";
                         }
+                        var description = article.short_description;
+                        if (description === ""){
+                            description = article.body.substr(0, 10) + "...";
+                        }
+
                         articleContainer.append(
                             "<div " + isApproved + ">" +
-                                "<button type=\"button\" class=\"close btn-large\" onclick=\"\"><i class=\"icon-refresh\"></i></button>" +
-                                "<h4>" + article.caption + "</h4>" +
-                                "<div>" + article.body + "</div>" +
-                                "<button class='btn' onclick='editArticle(\""  + article.id + "\")'>edit</button> " +
-                                "<button class='btn' onclick='deleteArticle(\""  + article.id  + "\", \"" + article.group  + "\")'>delete</button> " +
+                                "<button type=\"button\" class=\"close close-edit btn-large\" data-toggle=\"tooltip\" title=\"Edit\" onclick='editArticle(\""  + article.id + "\")'><i class=\"icon-pencil\"></i></button>" +
                                 @if(isAdmin){
-                                    "<button class='btn' " + approvedStyle + " onclick='approveArticle(\""  + article.id  + "\", \"" + article.group  + "\")'>approve</button> " +
+                                "<button type=\"button\" class=\"close close-edit btn-large\" data-toggle=\"tooltip\" title=\"Approve\" onclick='approveArticle(\""  + article.id  + "\", \"" + article.group  + "\")'><i class=\"icon-ok-sign\"></i></button>" +
                                 }
-                            "</div>");
+                                "<button type=\"button\" class=\"close close-edit btn-large\"  data-toggle=\"tooltip\" title=\"Delete\" onclick='deleteArticle(\""  + article.id  + "\", \"" + article.group  + "\")'><i class=\"icon-remove-sign\"></i></button>" +
+                                "<h4>" + article.caption + "</h4>" +
+                                "<div>" + description + "</div>" +
+                            "</div><hr>");
 
+                    })});
+//                    $(".close-edit").tooltip("delay: {show: 100, hide: 100}");
+                    $(".close-edit").tooltip("destroy");
+                    $(".close-edit").tooltip();
+                }, "GET");
+            }
+
+            function getGroups(){
+                send_request("/groups", 'mainContainer', function(data){
+                    var groupsContainer = $("#groupsContainer");
+                    groupsContainer.html("");
+                    data.forEach(function(pre_groups){pre_groups.forEach(function(group){
+                        groupsContainer.append(
+                        "<li id=\"li_" + group.id + "\">" +
+                        "<button type=\"button\" class=\"close close-edit btn-large\" data-toggle=\"tooltip\" title=\"Refresh\" onclick=\"getArticlesForGroup('" + group.name + "');\"><i class=\"icon-refresh\"></i></button>" +
+                        "<a onclick=\"getArticlesForGroup('" + group.name + "');\" data-toggle=\"tab\">" + group.name +  "</a></li>"
+                        );
                     })});
                 }, "GET");
             }
 
             function createArticle(){
                 $("#form_last_update_container").hide();
+
+                $("#form_id").val('');
+                $("#form_caption").val('');
+                $("#form_short_description").val('');
+                $("#form_body").text('');
+                $("#form_group").val('');
+
                 @if(isAdmin){
                     $("#form_approve").hide();
                 }
@@ -88,6 +127,7 @@
                 send_request("/articles/" + id, 'form_error_container', function(data){
                     $("#form_id").val(data.id);
                     $("#form_caption").val(data.caption);
+                    $("#form_short_description").val(data.short_description);
                     $("#form_body").text(data.body);
                     $("#form_group").val(data.group);
                     $("#form_last_update").html(data.last_update);
@@ -142,15 +182,12 @@
             <div class="bar" style="width: 100%;"></div>
         </div>
         <div class="well">
-            <a href="#formModal" role="button" class="btn" data-toggle="modal" onclick="createArticle()"><i class="icon-refresh"></i>@Messages("articlesAddNewArticle")</a>
+            <a href="#formModal" role="button" class="btn btn-primary" data-toggle="modal" onclick="createArticle()">@Messages("articlesAddNewArticle")</a>
         </div>
         <div class="well" id="mainContainer">
             <div class ="row">
                 <div class="span4">
-                    <ul class="nav nav-pills nav-stacked">
-                    @groups.map { key =>
-                        <li id="li_@key"><a onclick="getArticlesForGroup('@key');" data-toggle="tab">@key</a></li>
-                    }
+                    <ul class="nav nav-pills nav-stacked" id="groupsContainer">
                     </ul>
                 </div>
                 <div class="span7" id="articlesContainer">
@@ -171,10 +208,12 @@
                     <input type="hidden" id="form_id" name="_id"/>
                     <label>Caption:</label>
                     <input id="form_caption" name="caption" type="text" placeholder="Type caption…"><br>
+                    <label>Short description:</label>
+                    <input id="form_short_description" name="short_description" type="text" placeholder="Optional: short description"><br>
                     <label>Body:</label>
                     <textarea id="form_body" name="body" rows="3"></textarea>
                     <label>group:</label>
-                    <input id="form_group" name="group" type="text" data-provide="typeahead" data-source="@groups.mkString("[", ",", "]")"><br>
+                    <input id="form_group" name="group" type="text" data-provide="typeahead" data-source="@groups.mkString("['", "','", "']")"><br>
                 </fieldset>
             </form>
             <div style="display: none" id="form_last_update_container">Last update: <label id="form_last_update">Now</div>
