@@ -62,37 +62,38 @@
             }
 
             function getArticlesForGroup(group){
-                send_request("/articles/group/" + group, 'mainContainer', function(data){
-                    $("#oneArticleContainer").html("");
+                send_request("/articles/group/" + group, 'mainContainer', displayArticles , "GET");
+            }
 
-                    var articleContainer = $("#articlesContainer");
-                    articleContainer.html("");
-                    data.forEach(function(pre_articles){pre_articles.forEach(function(article){
-                        var isApproved = article.approved == "true" ? "" : "class = 'new'"
+            function displayArticles(data){
+                $("#oneArticleContainer").html("");
+
+                var articleContainer = $("#articlesContainer");
+                articleContainer.html("");
+                data.forEach(function(pre_articles){pre_articles.forEach(function(article){
+                    var isApproved = article.approved == "true" ? "" : "class = 'new'"
+                    @if(isAdmin){
+                        var approvedStyle = article.approved == 'true' ? "style=\"display: none;\"" : "";
+                    }
+                    var description = article.short_description;
+                    if (description === ""){
+                        description = article.body.substr(0, 10) + "...";
+                    }
+
+                    articleContainer.append(
+                        "<li " + isApproved + ">" +
+                        "<button type=\"button\" class=\"close close-edit btn-large\" data-toggle=\"tooltip\" title=\"Edit\" onclick='editArticle(\""  + article.id + "\")'><i class=\"icon-pencil\"></i></button>" +
                         @if(isAdmin){
-                            var approvedStyle = article.approved == 'true' ? "style=\"display: none;\"" : "";
+                            "<button type=\"button\" class=\"close close-edit btn-large " + approvedStyle + "\" data-toggle=\"tooltip\" title=\"Approve\" onclick='approveArticle(\""  + article.id  + "\", \"" + article.group  + "\")'><i class=\"icon-ok-sign\"></i></button>" +
                         }
-                        var description = article.short_description;
-                        if (description === ""){
-                            description = article.body.substr(0, 10) + "...";
-                        }
-
-                        articleContainer.append(
-                            "<li " + isApproved + ">" +
-                                "<button type=\"button\" class=\"close close-edit btn-large\" data-toggle=\"tooltip\" title=\"Edit\" onclick='editArticle(\""  + article.id + "\")'><i class=\"icon-pencil\"></i></button>" +
-                                @if(isAdmin){
-                                "<button type=\"button\" class=\"close close-edit btn-large " + approvedStyle + "\" data-toggle=\"tooltip\" title=\"Approve\" onclick='approveArticle(\""  + article.id  + "\", \"" + article.group  + "\")'><i class=\"icon-ok-sign\"></i></button>" +
-                                }
-                                "<button type=\"button\" class=\"close close-edit btn-large\"  data-toggle=\"tooltip\" title=\"Delete\" onclick='deleteArticle(\""  + article.id  + "\", \"" + article.group  + "\")'><i class=\"icon-remove-sign\"></i></button>" +
-                                "<a onclick=\"showArticle('" + article.id + "');\" data-toggle=\"tab\"><h4>" + article.caption + "</h4>" +
-                                "<div>" + description + "</div></a>" +
-                            "</li><hr>");
-
-                    })});
-//                    $(".close-edit").tooltip("delay: {show: 100, hide: 100}");
-                    $(".close-edit").tooltip("destroy");
-                    $(".close-edit").tooltip();
-                }, "GET");
+                        "<button type=\"button\" class=\"close close-edit btn-large\"  data-toggle=\"tooltip\" title=\"Delete\" onclick='deleteArticle(\""  + article.id  + "\", \"" + article.group  + "\")'><i class=\"icon-remove-sign\"></i></button>" +
+                        "<a onclick=\"showArticle('" + article.id + "');\" data-toggle=\"tab\"><h4>" + article.caption + "</h4>" +
+                        "<div>" + description + "</div></a>" +
+                        "</li><hr>");
+                })});
+                //                    $(".close-edit").tooltip("delay: {show: 100, hide: 100}");
+                $(".close-edit").tooltip("destroy");
+                $(".close-edit").tooltip();
             }
 
             function getGroups(){
@@ -178,6 +179,17 @@
                 }, "POST", $("#article_form").serialize());
             }
 
+            function doSearch(){
+                send_request("/search/" + $("#search_query").val(), "searchErrorContainer", displayArticles, "GET");
+            }
+
+            function doReindex(){
+                send_request("/search/do_reindex", "searchErrorContainer", function(data){
+                    $("#searchModal").modal("show");
+                    $("#searchContainer").html(data);
+                }, "GET");
+            }
+
             @if(isAdmin){
                 function approveArticle(id, group){
                     console.log("approving");
@@ -195,7 +207,21 @@
             <div class="bar" style="width: 100%;"></div>
         </div>
         <div class="well">
-            <a href="#formModal" role="button" class="btn btn-primary" data-toggle="modal" onclick="createArticle()">@Messages("articlesAddNewArticle")</a>
+            <div class="row">
+                <div class="span4">
+                    <a href="#formModal" role="button" class="btn btn-primary" data-toggle="modal" onclick="createArticle()">@Messages("articlesAddNewArticle")</a>
+                </div>
+                <div class="span5">
+                    <div class="input-append">
+                        <input class="span4" id="search_query" type="text">
+                        <button class="btn" type="button" onclick="doSearch();">Search</button>
+                        <button class="btn" type="button" onclick="doReindex();">reindex</button>
+                    </div>
+                </div>
+            </div>
+            <div id="searchErrorContainer">
+
+            </div>
         </div>
         <div class="well" id="mainContainer">
             <div class ="row">
@@ -242,6 +268,19 @@
                 <button class='btn' id="form_approve">approve</button>
             }
             <input class="btn btn-success" value="@Messages("articleCreate")" onclick="saveArticle();">
+        </div>
+    </div>
+
+
+    <div id="searchModal" class="modal hide fade">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>Result of the search</h3>
+        </div>
+        <div class="modal-body" id="searchContainer">
+        </div>
+        <div class="modal-footer">
+            <input class="btn btn-success" value="whatever">
         </div>
     </div>
 

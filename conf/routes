@@ -28,5 +28,9 @@ GET     /groups                             controllers.GroupsController.list
 POST    /groups                             controllers.GroupsController.create
 POST    /groups/:id/edit                    controllers.GroupsController.edit(id: String)
 
+#search
+GET     /search/do_reindex                  controllers.SearchController.doReindex
+GET     /search/:query                      controllers.SearchController.search(query: String)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

@@ -2,6 +2,7 @@ package dao
 
 import com.mongodb.casbah.Imports._
 import play.api.i18n.Messages
+import play.api.Logger
 
 object MongoWrapper {
   private val mongoClientName =  "site2"
@@ -15,7 +16,10 @@ object MongoWrapper {
   }
 
   def insert(collectionName: String, objectToInsert: MongoDBObject){
-    executeQuery(collectionName, (collection: MongoCollection) => collection.insert(objectToInsert))
+    executeQuery(collectionName, (collection: MongoCollection) => {
+      val wr = collection.insert(objectToInsert)
+      Logger.info(wr.toString())
+    })
   }
 
   def find[T](collectionName: String, converter: (DBObject) => T, query: Option[MongoDBObject] = None): List[T] = {
